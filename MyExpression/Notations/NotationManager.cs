@@ -19,8 +19,6 @@ namespace MyExpression.Notations
             notations.Add("Postfix", new PostfixNotation());
         }
 
-        public static string[] notationArray = new string[] { "Prefix", "Postfix", "Infix", "Postfix", "Infix", "Prefix" };
-
         public Notation getNotation(string notationName)
         {
             if (notations.ContainsKey(notationName))

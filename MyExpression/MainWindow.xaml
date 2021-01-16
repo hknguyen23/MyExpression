@@ -30,12 +30,12 @@
                 Click="btnConvert_Click" />
 
         <Button Name="btnEvaluate" Content="Evaluate" Height="25" Width="80" Canvas.Left="290" Canvas.Top="154"
-                Click="btnEvaluate_Click" />
+                Click="btnEvaluate_Click" Visibility="Hidden" />
 
         <Label Name="lbNotationName" Height="25" Canvas.Top="154" />
         <TextBlock Name="textBlockToStringResult" Canvas.Top="158" Canvas.Left="48" MaxWidth="220"
                    MinHeight="25" TextWrapping="Wrap"  />
-        <Label Height="25" Canvas.Top="214" Content="Result: "/>
+        <Label Name="lbEvaluateResult" Height="25" Canvas.Top="214" Content="Result: " Visibility="Hidden"/>
         <TextBlock Name="textBlockEvaluateResult" Height="25" MaxWidth="220" Canvas.Top="219" Canvas.Left="48" />
     </Canvas>
 </Window>

@@ -21,15 +21,15 @@ namespace MyExpression
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-    public partial class MainWindow : Window
+    public partial class MainWindow : Window // context
     {
+        string[] notationArray = new string[] { "Prefix", "Postfix", "Infix", "Postfix", "Infix", "Prefix" };
         Expressions.Expression exp;
-        Notation notation;
         int selectedIndex = -1;
         List<string> varibles = new List<string>();
         NotationManager notationManager = NotationManager.getInstance();
         Converter.Converter converter;
-        List<string> rawInput = new List<string>();
+        string rawInput = "";
 
         public MainWindow()
         {
@@ -118,16 +118,11 @@ namespace MyExpression
             }
         }
 
-        private Notation getNotation(string notationName) // factory
-        {
-            return notationManager.getNotation(notationName);
-        }
 
         private void cmbNotations_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             selectedIndex = cmbNotations.SelectedIndex;
-            notation = getNotation(NotationManager.notationArray[selectedIndex]);
-            lbNotationName.Content = NotationManager.notationArray[selectedIndex] + ": ";
+
             if (selectedIndex == 0 || selectedIndex == 1)
             {
                 converter = new InfixToPrefixOrPostfix();
@@ -140,6 +135,10 @@ namespace MyExpression
             {
                 converter = new PostfixToInfixOrPrefix();
             }
+
+            lbNotationName.Content = notationArray[selectedIndex] + ": ";
+
+            converter.setNotation(notationManager.getNotation(notationArray[selectedIndex]));// set strategy for context
         }
 
         private void btnConvert_Click(object sender, RoutedEventArgs e)
@@ -150,17 +149,22 @@ namespace MyExpression
                 return;
             }
 
-            rawInput.Add(textBoxExpression.Text);
+            lbEvaluateResult.Visibility = Visibility.Hidden;
+            textBlockEvaluateResult.Text = "";
+            btnEvaluate.Visibility = Visibility.Visible;
+            rawInput = textBoxExpression.Text;
             varibles.Clear();
             variblesListBox.Items.Clear();
 
-            string result = converter.convert(textBoxExpression.Text,ref exp, notation, varibles);
+            string result = converter.convert(textBoxExpression.Text,ref exp, varibles);
             setVariblesList(varibles);
             textBlockToStringResult.Text = result;
         }
 
         private void btnEvaluate_Click(object sender, RoutedEventArgs e)
         {
+            lbEvaluateResult.Visibility = Visibility.Visible;
+
             try
             {
                 if (varibles.Count == 0)
@@ -182,11 +186,7 @@ namespace MyExpression
 
         private void btnReset_Click(object sender, RoutedEventArgs e)
         {
-            if (rawInput.Count == 0)
-            {
-                return;
-            }
-            textBoxExpression.Text = rawInput[0];
+            textBoxExpression.Text = rawInput;
         }
     }
 }

@@ -7,9 +7,17 @@ using System.Threading.Tasks;
 
 namespace MyExpression.Converter
 {
-    public class Converter
+    public class Converter // context
     {
-        public string convert(string textBoxExpression, ref Expression exp, Notation notation, List<string> varibles)
+        Notation notation; // strategy
+
+        public void setNotation(Notation notation)
+        {
+            this.notation = notation;
+        }
+
+        // template method
+        public string convert(string textBoxExpression, ref Expression exp, List<string> varibles)
         {
             string postfix;
             string[] tokens = new string[] { };
@@ -31,7 +39,7 @@ namespace MyExpression.Converter
                 return "";
             }
 
-            return exp.toString(notation);
+            return exp.toString(this.notation);
         }
 
         // bước 1

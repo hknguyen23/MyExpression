@@ -81,6 +81,7 @@ namespace MyExpression.Expressions
             return calculate(this.Expression1, this.Op, this.Expression2);
         }
 
+        //  
         public override string toString(Notation notation)
         {
             return notation.arrange(this.Expression1.toString(notation), this.Op, this.Expression2.toString(notation));
