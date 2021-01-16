@@ -8,14 +8,18 @@ namespace MyExpression.Notations
 {
     public class NotationManager
     {
+        private static NotationManager instance = null;// singleton
+
         private Dictionary<string, Notation> notations = new Dictionary<string, Notation>();
-        private static NotationManager instance = null;
-        private NotationManager()
+
+        private NotationManager() // factory
         {
             notations.Add("Infix", new InfixNotation());
             notations.Add("Prefix", new PrefixNotation());
             notations.Add("Postfix", new PostfixNotation());
         }
+
+        public static string[] notationArray = new string[] { "Prefix", "Postfix", "Infix", "Postfix", "Infix", "Prefix" };
 
         public Notation getNotation(string notationName)
         {

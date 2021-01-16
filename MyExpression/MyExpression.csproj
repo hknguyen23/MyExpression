@@ -63,9 +63,14 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="ConvertStrategy\ConvertStrategy.cs" />
+    <Compile Include="ConvertStrategy\InfixToPrefixOrPostfix.cs" />
+    <Compile Include="ConvertStrategy\PostfixToInfixOrPrefix.cs" />
+    <Compile Include="ConvertStrategy\PrefixToInfixOrPostFix.cs" />
     <Compile Include="Expressions\BinaryExpression.cs" />
     <Compile Include="Expressions\ConstExpression.cs" />
     <Compile Include="Expressions\Expression.cs" />
+    <Compile Include="Helper.cs" />
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
@@ -102,5 +107,6 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

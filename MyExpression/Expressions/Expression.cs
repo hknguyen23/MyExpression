@@ -9,7 +9,6 @@ namespace MyExpression.Expressions
     public abstract class Expression
     {
         public abstract double evaluate();
-        //public Expression derive();
         public abstract string toString(Notation notation);
     }
 }

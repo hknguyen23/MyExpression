@@ -12,6 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using MyExpression.ConvertStrategy;
 using MyExpression.Expressions;
 using MyExpression.Notations;
 
@@ -26,228 +27,14 @@ namespace MyExpression
         Notation notation;
         int selectedIndex = -1;
         List<string> varibles = new List<string>();
-        string[] notationArray = new string[] { "Prefix", "Postfix", "Infix", "Postfix", "Infix", "Prefix" };
         NotationManager notationManager = NotationManager.getInstance();
+        ConvertStrategy.ConvertStrategy strategy;
 
         public MainWindow()
         {
             InitializeComponent();
         }
-
-        private bool isNumeric(char c)
-        {
-            return c >= '0' && c <= '9';
-        }
-
-        private bool isLetter(string s)
-        {
-            if (s[0] == '-' && s.Length > 1)
-            {
-                return (s[1] >= 'a' && s[1] <= 'z') || (s[1] >= 'A' && s[1] <= 'Z');
-            }
-            return (s[0] >= 'a' && s[0] <= 'z') || (s[0] >= 'A' && s[0] <= 'Z');
-        }
-
-        private bool isOperator(string s)
-        {
-            return s == "+" || s == "-" || s == "*" || s == "/" || s == "^";
-        }
-
-        private bool isLargerOrEqual(char x, char y)
-        {
-            switch (x)
-            {
-                case '+':
-                case '-':
-                    return y == '+' || y == '-';
-                case '*':
-                case '/':
-                    return y == '+' || y == '-' || y == '*' || y == '/';
-            }
-            return true;
-        }
-
-        private string infixToPostfix(string exp)
-        {
-            Stack<char> ops = new Stack<char>();
-            StringBuilder result = new StringBuilder();
-
-            for (int i = 0; i < exp.Length; i++)
-            {
-                char c = exp[i];
-                if (c == '(')
-                {
-                    ops.Push(c);
-                }
-                else if (isLetter(c + ""))
-                {
-                    StringBuilder sb = new StringBuilder();
-                    while (i < exp.Length && (isNumeric(exp[i]) || isLetter(exp[i] + ""))) {
-                        c = exp[i];
-                        sb.Append(c);
-                        i++;
-                    }
-                    i--;
-                    int j = i - sb.Length;
-                    if (j >= 0)
-                    {
-                        if (exp[j] == '-')
-                        {
-                            if (j == 0)
-                            {
-                                result.Append("-" + sb.ToString() + " ");
-                                ops.Pop();
-                            }
-                            else if (j == 1)
-                            {
-                                if (exp[j - 1] == '(')
-                                {
-                                    result.Append("-" + sb.ToString() + " ");
-                                    ops.Pop();
-                                }
-                                else result.Append(sb.ToString() + " ");
-                            }
-                            else
-                            {
-                                if (isOperator(exp[j - 1] + "") || exp[j - 1] == '(')
-                                {
-                                    if (result.ToString().Split(new string[] { " " },
-                                        StringSplitOptions.RemoveEmptyEntries).Length >= 2)
-                                    {
-                                        result.Remove(result.Length - 3, 2);
-                                    }
-                                    result.Append("-" + sb.ToString() + " ");
-                                    ops.Pop();
-                                    if (isOperator(exp[j - 1] + ""))
-                                        ops.Push(exp[j - 1]);
-                                }
-                                else result.Append(sb.ToString() + " ");
-                            }
-                        }
-                        else result.Append(sb.ToString() + " ");
-                    }
-                    else result.Append(sb.ToString() + " ");
-                }
-                else if (isNumeric(c) || c == '.')
-                {
-                    StringBuilder sb = new StringBuilder();
-                    while (i < exp.Length && (isNumeric(exp[i]) || exp[i] == '.'))
-                    {
-                        c = exp[i];
-                        sb.Append(c);
-                        i++;
-                    }
-                    i--;
-                    int j = i - sb.Length;
-                    if (j >= 0)
-                    {
-                        if (exp[j] == '-')
-                        {
-                            if (j == 0)
-                            {
-                                result.Append((-1 * Double.Parse(sb.ToString())) + " ");
-                                ops.Pop();
-                            }
-                            else if (j == 1)
-                            {
-                                if (exp[j - 1] == '(')
-                                {
-                                    result.Append((-1 * Double.Parse(sb.ToString())) + " ");
-                                    ops.Pop();
-                                }
-                                else result.Append(Double.Parse(sb.ToString()) + " ");
-                            }
-                            else
-                            {
-                                if (isOperator(exp[j - 1] + "") || exp[j - 1] == '(')
-                                {
-                                    if (result.ToString().Split(new string[] { " " }, 
-                                        StringSplitOptions.RemoveEmptyEntries).Length >= 2)
-                                    {
-                                        result.Remove(result.Length - 3, 2);
-                                    }
-                                    result.Append((-1 * Double.Parse(sb.ToString())) + " ");
-                                    ops.Pop();
-                                    if (isOperator(exp[j - 1] + ""))
-                                        ops.Push(exp[j - 1]);
-                                }
-                                else result.Append(Double.Parse(sb.ToString()) + " ");
-                            }
-                        }
-                        else result.Append(Double.Parse(sb.ToString()) + " ");
-                    }
-                    else result.Append(Double.Parse(sb.ToString()) + " ");
-                }
-                else if (isOperator(c + ""))
-                {
-                    if (c == '-' && i < exp.Length - 1)
-                    {
-                        if (i == 0 && exp[i + 1] == '(')
-                        {
-                            // -(1+1)
-                            result.Append(0 + " ");
-                        }
-                        else
-                        {
-                            // -(-(1+1))
-                            if (exp[i + 1] == '(' && exp[i - 1] == '(')
-                            {
-                                result.Append(0 + " ");
-                            }
-                        }
-                    }
-                    while (ops.Count != 0 && ops.Peek() != '(')
-                    {
-                        char temp = ops.Peek();
-                        if (isLargerOrEqual(temp, c))
-                        {
-                            temp = ops.Pop();
-                            result.Append(temp + " ");
-                        }
-                        else break;
-                    }
-                    ops.Push(c);
-                }
-                else if (c == ')')
-                {
-                    while (ops.Count != 0 && ops.Peek() != '(')
-                    {
-                        char temp = ops.Pop();
-                        result.Append(temp + " ");
-                    }
-                    ops.Pop();
-                }
-                else continue;
-            }
-
-            while (ops.Count != 0)
-            {
-                result.Append(ops.Pop() + " ");
-            }
-
-            return result.ToString();
-        }
-
-        private string prefixToPostfix(string exp)
-        {
-            string[] tokens = exp.Split(new string[] { " " }, StringSplitOptions.RemoveEmptyEntries);
-            Stack<string> stack = new Stack<string>();
-            for (int i = tokens.Length - 1; i >= 0; i--)
-            {
-                if (isOperator(tokens[i]))
-                {
-                    string op1 = stack.Pop();
-                    string op2 = stack.Pop();
-                    stack.Push(op1 + " " + op2 + " " + tokens[i]);
-                }
-                else
-                {
-                    stack.Push(tokens[i]);
-                }
-            }
-            return stack.Pop();
-        }
-
+        
         private void setVariblesList(List<string> varibles) 
         {
             if (varibles.Count == 0)
@@ -296,9 +83,9 @@ namespace MyExpression
             TextBox textBox = (TextBox)stackPanel.Children[1];
             string variableValue = textBox.Text;
             string variableName = textBox.Tag.ToString();
-            string[] tokens = textBoxExpression.Text.Split(new string[] { "+", "-", "*", "/", "^", "(", ")" }, 
+            string[] tokens = textBoxExpression.Text.Split(new string[] { "+", "-", "*", "/", "^", "(", ")", " " }, 
                 StringSplitOptions.RemoveEmptyEntries);
-            int len = textBoxExpression.Text.Length;
+            string input = textBoxExpression.Text.Replace(" ", "");
 
             try
             {
@@ -306,17 +93,18 @@ namespace MyExpression
                 int j = 0;
                 for (int i = 0; i < tokens.Length; i++)
                 {
-                    while (j < textBoxExpression.Text.Length && (isOperator(textBoxExpression.Text[j] + "") 
-                        || textBoxExpression.Text[j] == '(' || textBoxExpression.Text[j] == ')'))
+                    while (j < input.Length && (Helper.isOperator(input[j] + "") 
+                        || input[j] == '(' || input[j] == ')'))
                     {
                         j++;
                     }
 
                     if (tokens[i] == variableName)
                     {
-                        int startIndex = textBoxExpression.Text.IndexOf(tokens[i], j, variableName.Length);
-                        textBoxExpression.Text = textBoxExpression.Text.Remove(startIndex, tokens[i].Length);
-                        textBoxExpression.Text = textBoxExpression.Text.Insert(startIndex, variableValue);
+                        int startIndex = input.IndexOf(tokens[i], j, variableName.Length);
+                        input = input.Remove(startIndex, tokens[i].Length);
+                        input = input.Insert(startIndex, variableValue);
+                        textBoxExpression.Text = input;
                         j += variableValue.Length + 1;
                     }
                     else j += tokens[i].Length + 1;
@@ -329,7 +117,7 @@ namespace MyExpression
             }
         }
 
-        private Notation getNotation(string notationName)
+        private Notation getNotation(string notationName) // factory
         {
             return notationManager.getNotation(notationName);
         }
@@ -337,17 +125,19 @@ namespace MyExpression
         private void cmbNotations_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             selectedIndex = cmbNotations.SelectedIndex;
-            if (selectedIndex == 0 || selectedIndex == 5)
+            notation = getNotation(NotationManager.notationArray[selectedIndex]);
+            lbNotationName.Content = NotationManager.notationArray[selectedIndex] + ": ";
+            if (selectedIndex == 0 || selectedIndex == 1)
             {
-                lbNotationName.Content = "Prefix: ";
+                strategy = new InfixToPrefixOrPostfix();
             }
             else if (selectedIndex == 1 || selectedIndex == 3)
             {
-                lbNotationName.Content = "Postfix: ";
+                strategy = new PrefixToInfixOrPostFix();
             }
             else
             {
-                lbNotationName.Content = "Infix: ";
+                strategy = new PostfixToInfixOrPrefix();
             }
         }
 
@@ -360,223 +150,11 @@ namespace MyExpression
             }
 
             varibles.Clear();
-            string inputExpression;
-            string postfix;
-            string[] tokens;
-            Stack<Expressions.Expression> stack = new Stack<Expressions.Expression>();
+            variblesListBox.Items.Clear();
 
-            switch (selectedIndex)
-            {
-                #region Infix to Prefix or Postfix
-                // Infix to Prefix or Postfix
-                case 0:
-                case 1:
-                    inputExpression = textBoxExpression.Text.Replace(" ", "");
-
-                    // remove "--"
-                    for (int i = 0; i < inputExpression.Length - 1; i++)
-                    {
-                        if (inputExpression[i] == '-' && inputExpression[i + 1] == '-')
-                        {
-                            if (i == 0)
-                            {
-                                // "--a-b"      --> "a-b"
-                                // "---a--b"    --> "-a--b"
-                                inputExpression = inputExpression.Remove(0, 2);
-                                i--;
-                            }
-                            else if (isOperator(inputExpression[i - 1] + "") || inputExpression[i - 1] == '(')
-                            {
-                                // "a----b"         --> "a--b"
-                                // "a---b"          --> "a-b"
-                                // "a/(--b*(c+d))   --> "a/(b*(c+d))
-                                inputExpression = inputExpression.Remove(i, 2);
-                                i--;
-                            }
-                        }
-                    }
-
-                    try
-                    {
-                        postfix = infixToPostfix(inputExpression);
-                    }
-                    catch
-                    {
-                        postfix = "";
-                    }
-                    
-                    tokens = postfix.Split(new string[] { " " }, StringSplitOptions.RemoveEmptyEntries);
-
-                    for (int i = 0; i < tokens.Length; i++)
-                    {
-                        if (isLetter(tokens[i]) && !varibles.Contains(tokens[i]))
-                        {
-                            varibles.Add(tokens[i]);
-                        }
-                    }
-
-                    variblesListBox.Items.Clear();
-                    setVariblesList(varibles);
-
-                    try
-                    {
-                        for (int i = 0; i < tokens.Length; i++)
-                        {
-                            if (isOperator(tokens[i]))
-                            {
-                                BinaryExpression binaryExpression = new BinaryExpression(tokens[i]);
-                                binaryExpression.addExpression2(stack.Pop());
-                                binaryExpression.addExpression1(stack.Pop());
-                                stack.Push(binaryExpression);
-                            }
-                            else if (isLetter(tokens[i]))
-                            {
-                                stack.Push(new ConstExpression(tokens[i]));
-                            }
-                            // tokens[i] is a number
-                            else
-                            {
-                                stack.Push(new ConstExpression(Double.Parse(tokens[i])));
-                            }
-                        }
-
-                        // final tree is top of nodes stack
-                        exp = new BinaryExpression(stack.Pop());
-
-
-                        notation = getNotation(notationArray[selectedIndex]);
-                        lbToStringResult.Content = exp.toString(notation);
-                    }
-                    catch
-                    {
-                        lbToStringResult.Content = "Invalid input!!!";
-                    }
-
-                    break;
-                #endregion
-
-                #region Prefix to Infix or Postfix
-                // Prefix to Infix or Postfix
-                case 2:
-                case 3:
-                    string prefix = textBoxExpression.Text;
-
-                    try
-                    {
-                        postfix = prefixToPostfix(prefix);
-                    }
-                    catch
-                    {
-                        postfix = "";
-                    }
-
-                    tokens = postfix.Split(new string[] { " " }, StringSplitOptions.RemoveEmptyEntries);
-
-                    for (int i = 0; i < tokens.Length; i++)
-                    {
-                        if (isLetter(tokens[i]) && !varibles.Contains(tokens[i]))
-                        {
-                            varibles.Add(tokens[i]);
-                        }
-                    }
-
-                    variblesListBox.Items.Clear();
-                    setVariblesList(varibles);
-
-                    try
-                    {
-                        for (int i = 0; i < tokens.Length; i++)
-                        {
-                            if (isOperator(tokens[i]))
-                            {
-                                BinaryExpression binaryExpression = new BinaryExpression(tokens[i]);
-                                binaryExpression.addExpression2(stack.Pop());
-                                binaryExpression.addExpression1(stack.Pop());
-                                stack.Push(binaryExpression);
-                            }
-                            else if (isLetter(tokens[i]))
-                            {
-                                stack.Push(new ConstExpression(tokens[i]));
-                            }
-                            // tokens[i] is a number
-                            else
-                            {
-                                stack.Push(new ConstExpression(Double.Parse(tokens[i])));
-                            }
-                        }
-
-                        // final tree is top of nodes stack
-                        exp = new BinaryExpression(stack.Pop());
-
-                        notation = getNotation(notationArray[selectedIndex]);
-                        lbToStringResult.Content = exp.toString(notation);
-                    }
-                    catch
-                    {
-                        lbToStringResult.Content = "Invalid input!!!";
-                    }
-
-                    break;
-                #endregion
-
-                #region Postfix to Infix or Prefix
-                // Postfix to Infix or Prefix
-                case 4:
-                case 5:
-                    postfix = textBoxExpression.Text;
-                    tokens = postfix.Split(new string[] { " " }, StringSplitOptions.RemoveEmptyEntries);
-
-                    for (int i = 0; i < tokens.Length; i++)
-                    {
-                        if (isLetter(tokens[i]) && !varibles.Contains(tokens[i]))
-                        {
-                            varibles.Add(tokens[i]);
-                        }
-                    }
-
-                    variblesListBox.Items.Clear();
-                    setVariblesList(varibles);
-
-                    try
-                    {
-                        for (int i = 0; i < tokens.Length; i++)
-                        {
-                            if (isOperator(tokens[i]))
-                            {
-                                BinaryExpression binaryExpression = new BinaryExpression(tokens[i]);
-                                binaryExpression.addExpression2(stack.Pop());
-                                binaryExpression.addExpression1(stack.Pop());
-                                stack.Push(binaryExpression);
-                            }
-                            else if (isLetter(tokens[i]))
-                            {
-                                stack.Push(new ConstExpression(tokens[i]));
-                            }
-                            // tokens[i] is a number
-                            else
-                            {
-                                stack.Push(new ConstExpression(Double.Parse(tokens[i])));
-                            }
-                        }
-
-                        // final tree is top of nodes stack
-                        exp = new BinaryExpression(stack.Pop());
-
-                        notation = getNotation(notationArray[selectedIndex]);
-                        lbToStringResult.Content = exp.toString(notation);
-                    }
-                    catch
-                    {
-                        lbToStringResult.Content = "Invalid input!!!";
-                    }
-
-                    break;
-                #endregion
-
-                default:
-                    return;
-            }
-            
+            string result = strategy.convert(textBoxExpression.Text,ref exp, notation, varibles);
+            setVariblesList(varibles);
+            lbToStringResult.Content = result;
         }
 
         private void btnEvaluate_Click(object sender, RoutedEventArgs e)
