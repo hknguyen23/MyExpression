@@ -11,12 +11,14 @@
         <Label Canvas.Top="31">Format for Prefix input (seperated with space): + - 2 7 * 8 / 4 12</Label>
         <Label Canvas.Top="62">Format for Postfix input (seperated with space): 4 55 + 62 23 - *</Label>
         <Label Canvas.Top="93">Expression:</Label>
-        <TextBox Name="textBoxExpression" Width="300" Height="25" Canvas.Left="74" Canvas.Top="94" />
+        <TextBox Name="textBoxExpression" Width="210" Height="25" Canvas.Left="74" Canvas.Top="94" />
+        <Button Name="btnReset" Content="Reset" Height="25" Width="80" Canvas.Left="290" Canvas.Top="94"
+                Click="btnReset_Click" />
 
         <ListBox Name="variblesListBox" Width="310" Height="400" Canvas.Left="379" Canvas.Top="1" />
 
-        <ComboBox Name="cmbNotations" Height="25" Width="200" Canvas.Top="124"
-                  SelectionChanged="cmbNotations_SelectionChanged">
+        <ComboBox Name="cmbNotations" Height="25" Width="280" Canvas.Top="124"
+                  SelectionChanged="cmbNotations_SelectionChanged" Canvas.Left="4">
             <ComboBoxItem>Infix to Prefix</ComboBoxItem>
             <ComboBoxItem>Infix to Postfix</ComboBoxItem>
             <ComboBoxItem>Prefix to Infix</ComboBoxItem>
@@ -24,14 +26,16 @@
             <ComboBoxItem>Postfix to Infix</ComboBoxItem>
             <ComboBoxItem>Postfix to Prefix</ComboBoxItem>
         </ComboBox>
-        <Button Name="btnConvert" Content="Convert" Height="25" Width="80" Canvas.Left="205" Canvas.Top="124"
+        <Button Name="btnConvert" Content="Convert" Height="25" Width="80" Canvas.Left="290" Canvas.Top="124"
                 Click="btnConvert_Click" />
 
-        <Button Name="btnEvaluate" Content="Evaluate" Height="25" Width="80" Canvas.Left="290" Canvas.Top="124"
+        <Button Name="btnEvaluate" Content="Evaluate" Height="25" Width="80" Canvas.Left="290" Canvas.Top="154"
                 Click="btnEvaluate_Click" />
 
         <Label Name="lbNotationName" Height="25" Canvas.Top="154" />
-        <Label Name="lbToStringResult" Height="25" Canvas.Top="154" Canvas.Left="40" />
-        <Label Name="lbEvaluateResult" Height="25" Canvas.Top="184" Content="Result: "/>
+        <TextBlock Name="textBlockToStringResult" Canvas.Top="158" Canvas.Left="48" MaxWidth="220"
+                   MinHeight="25" TextWrapping="Wrap"  />
+        <Label Height="25" Canvas.Top="214" Content="Result: "/>
+        <TextBlock Name="textBlockEvaluateResult" Height="25" MaxWidth="220" Canvas.Top="219" Canvas.Left="48" />
     </Canvas>
 </Window>

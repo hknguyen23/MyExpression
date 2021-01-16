@@ -5,28 +5,50 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MyExpression.ConvertStrategy
+namespace MyExpression.Converter
 {
-    class PrefixToInfixOrPostFix : ConvertStrategy
+    public class Converter
     {
-        public override string convert(string textBoxExpression, ref Expression exp, Notation notation, List<string> varibles)
+        public string convert(string textBoxExpression, ref Expression exp, Notation notation, List<string> varibles)
         {
             string postfix;
-            string[] tokens;
+            string[] tokens = new string[] { };
+            string inputExpression = textBoxExpression;
             Stack<Expressions.Expression> stack = new Stack<Expressions.Expression>();
-            string prefix = textBoxExpression;
 
-            try
-            {
-                postfix = prefixToPostfix(prefix);
-            }
-            catch
-            {
-                postfix = "";
-            }
+            normalizeIfNeeded(ref inputExpression);
+
+            postfix = convertToPostfix(inputExpression);
 
             tokens = postfix.Split(new string[] { " " }, StringSplitOptions.RemoveEmptyEntries);
 
+            addVariables(tokens, varibles);
+
+            exp = createRootExpression(tokens, stack);
+
+            if (exp == null)
+            {
+                return "";
+            }
+
+            return exp.toString(notation);
+        }
+
+        // bước 1
+        protected virtual void normalizeIfNeeded(ref string inputExpression)
+        {
+            return;
+        }
+
+        // bước 2
+        protected virtual string convertToPostfix(string inputExpression)
+        {
+            return inputExpression;
+        }
+
+        // bước 3
+        protected void addVariables(string[] tokens, List<string> varibles)
+        {
             for (int i = 0; i < tokens.Length; i++)
             {
                 if (Helper.isLetter(tokens[i]) && !varibles.Contains(tokens[i]))
@@ -34,10 +56,11 @@ namespace MyExpression.ConvertStrategy
                     varibles.Add(tokens[i]);
                 }
             }
+        }
 
-            //variblesListBox.Items.Clear(); nhớ làm lại bên main
-            //setVariblesList(varibles);
-
+        // bước 4
+        protected Expression createRootExpression(string[] tokens, Stack<Expression> stack)
+        {
             try
             {
                 for (int i = 0; i < tokens.Length; i++)
@@ -61,34 +84,12 @@ namespace MyExpression.ConvertStrategy
                 }
 
                 // final tree is top of nodes stack
-                exp = new BinaryExpression(stack.Pop());
-
-                return exp.toString(notation);
+                return new BinaryExpression(stack.Pop());
             }
             catch
             {
-                return "Invalid input!!!";
+                return null;
             }
-        }
-
-        private string prefixToPostfix(string exp)
-        {
-            string[] tokens = exp.Split(new string[] { " " }, StringSplitOptions.RemoveEmptyEntries);
-            Stack<string> stack = new Stack<string>();
-            for (int i = tokens.Length - 1; i >= 0; i--)
-            {
-                if (Helper.isOperator(tokens[i]))
-                {
-                    string op1 = stack.Pop();
-                    string op2 = stack.Pop();
-                    stack.Push(op1 + " " + op2 + " " + tokens[i]);
-                }
-                else
-                {
-                    stack.Push(tokens[i]);
-                }
-            }
-            return stack.Pop();
         }
 
     }

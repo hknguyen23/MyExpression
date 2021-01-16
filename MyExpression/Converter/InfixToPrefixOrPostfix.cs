@@ -1,22 +1,28 @@
-﻿using MyExpression.Expressions;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MyExpression.ConvertStrategy
+namespace MyExpression.Converter
 {
-    class InfixToPrefixOrPostfix : ConvertStrategy
+    class InfixToPrefixOrPostfix : Converter
     {
-        public override string convert(string textBoxExpression, ref Expression exp, Notation notation, List<string> varibles)
+        protected override string convertToPostfix(string inputExpression)
         {
-            string postfix;
-            string[] tokens;
-            string inputExpression = textBoxExpression.Replace(" ", "");
-            Stack<Expressions.Expression> stack = new Stack<Expressions.Expression>();
+            try
+            {
+                return infixToPostfix(inputExpression);
+            }
+            catch
+            {
+                return "";
+            }
+        }
 
-            // remove "--"
+        protected override void normalizeIfNeeded(ref string inputExpression)
+        {
+            inputExpression = inputExpression.Replace(" ", "");
             for (int i = 0; i < inputExpression.Length - 1; i++)
             {
                 if (inputExpression[i] == '-' && inputExpression[i + 1] == '-')
@@ -37,60 +43,6 @@ namespace MyExpression.ConvertStrategy
                         i--;
                     }
                 }
-            }
-
-            try
-            {
-                postfix = infixToPostfix(inputExpression);
-            }
-            catch
-            {
-                postfix = "";
-            }
-
-            tokens = postfix.Split(new string[] { " " }, StringSplitOptions.RemoveEmptyEntries);
-
-            for (int i = 0; i < tokens.Length; i++)
-            {
-                if (Helper.isLetter(tokens[i]) && !varibles.Contains(tokens[i]))
-                {
-                    varibles.Add(tokens[i]);
-                }
-            }
-
-            //variblesListBox.Items.Clear(); làm lại bên mainwindow
-            //setVariblesList(varibles);
-
-            try
-            {
-                for (int i = 0; i < tokens.Length; i++)
-                {
-                    if (Helper.isOperator(tokens[i]))
-                    {
-                        BinaryExpression binaryExpression = new BinaryExpression(tokens[i]);
-                        binaryExpression.addExpression2(stack.Pop());
-                        binaryExpression.addExpression1(stack.Pop());
-                        stack.Push(binaryExpression);
-                    }
-                    else if (Helper.isLetter(tokens[i]))
-                    {
-                        stack.Push(new ConstExpression(tokens[i]));
-                    }
-                    // tokens[i] is a number
-                    else
-                    {
-                        stack.Push(new ConstExpression(Double.Parse(tokens[i])));
-                    }
-                }
-
-                // final tree is top of nodes stack
-                exp = new BinaryExpression(stack.Pop());
-
-                return exp.toString(notation);
-            }
-            catch
-            {
-               return "Invalid input!!!";
             }
         }
 
@@ -217,8 +169,9 @@ namespace MyExpression.ConvertStrategy
                         }
                         else
                         {
-                            // -(-(1+1))
-                            if (exp[i + 1] == '(' && exp[i - 1] == '(')
+                            // -(-(1+1)) or 10/-(2+3)
+                            if ((exp[i + 1] == '(' && exp[i - 1] == '(') ||
+                                (exp[i + 1] == '(' && Helper.isOperator(exp[i - 1] + "")))
                             {
                                 result.Append(0 + " ");
                             }

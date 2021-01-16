@@ -63,10 +63,10 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="ConvertStrategy\ConvertStrategy.cs" />
-    <Compile Include="ConvertStrategy\InfixToPrefixOrPostfix.cs" />
-    <Compile Include="ConvertStrategy\PostfixToInfixOrPrefix.cs" />
-    <Compile Include="ConvertStrategy\PrefixToInfixOrPostFix.cs" />
+    <Compile Include="Converter\Converter.cs" />
+    <Compile Include="Converter\InfixToPrefixOrPostfix.cs" />
+    <Compile Include="Converter\PostfixToInfixOrPrefix.cs" />
+    <Compile Include="Converter\PrefixToInfixOrPostfix.cs" />
     <Compile Include="Expressions\BinaryExpression.cs" />
     <Compile Include="Expressions\ConstExpression.cs" />
     <Compile Include="Expressions\Expression.cs" />

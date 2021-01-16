@@ -12,9 +12,9 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-using MyExpression.ConvertStrategy;
 using MyExpression.Expressions;
 using MyExpression.Notations;
+using MyExpression.Converter;
 
 namespace MyExpression
 {
@@ -28,7 +28,8 @@ namespace MyExpression
         int selectedIndex = -1;
         List<string> varibles = new List<string>();
         NotationManager notationManager = NotationManager.getInstance();
-        ConvertStrategy.ConvertStrategy strategy;
+        Converter.Converter converter;
+        List<string> rawInput = new List<string>();
 
         public MainWindow()
         {
@@ -85,7 +86,7 @@ namespace MyExpression
             string variableName = textBox.Tag.ToString();
             string[] tokens = textBoxExpression.Text.Split(new string[] { "+", "-", "*", "/", "^", "(", ")", " " }, 
                 StringSplitOptions.RemoveEmptyEntries);
-            string input = textBoxExpression.Text.Replace(" ", "");
+            string input = textBoxExpression.Text;
 
             try
             {
@@ -94,7 +95,7 @@ namespace MyExpression
                 for (int i = 0; i < tokens.Length; i++)
                 {
                     while (j < input.Length && (Helper.isOperator(input[j] + "") 
-                        || input[j] == '(' || input[j] == ')'))
+                        || input[j] == '(' || input[j] == ')' || input[j] == ' '))
                     {
                         j++;
                     }
@@ -129,15 +130,15 @@ namespace MyExpression
             lbNotationName.Content = NotationManager.notationArray[selectedIndex] + ": ";
             if (selectedIndex == 0 || selectedIndex == 1)
             {
-                strategy = new InfixToPrefixOrPostfix();
+                converter = new InfixToPrefixOrPostfix();
             }
-            else if (selectedIndex == 1 || selectedIndex == 3)
+            else if (selectedIndex == 2 || selectedIndex == 3)
             {
-                strategy = new PrefixToInfixOrPostFix();
+                converter = new PrefixToInfixOrPostfix();
             }
             else
             {
-                strategy = new PostfixToInfixOrPrefix();
+                converter = new PostfixToInfixOrPrefix();
             }
         }
 
@@ -149,12 +150,13 @@ namespace MyExpression
                 return;
             }
 
+            rawInput.Add(textBoxExpression.Text);
             varibles.Clear();
             variblesListBox.Items.Clear();
 
-            string result = strategy.convert(textBoxExpression.Text,ref exp, notation, varibles);
+            string result = converter.convert(textBoxExpression.Text,ref exp, notation, varibles);
             setVariblesList(varibles);
-            lbToStringResult.Content = result;
+            textBlockToStringResult.Text = result;
         }
 
         private void btnEvaluate_Click(object sender, RoutedEventArgs e)
@@ -164,18 +166,27 @@ namespace MyExpression
                 if (varibles.Count == 0)
                 {
                     double result = exp.evaluate();
-                    lbEvaluateResult.Content = "Result: " + result;
+                    textBlockEvaluateResult.Text = result.ToString();
                 }
                 else
                 {
                     // if there're varibles, display the result with variables
-                    lbEvaluateResult.Content = "Result: " + exp.toString(new InfixNotation());
+                    textBlockEvaluateResult.Text = exp.toString(new InfixNotation());
                 }
             }
             catch
             {
-                lbEvaluateResult.Content = "Result: Invalid input!!!";
+                textBlockEvaluateResult.Text = "Invalid input!!!";
             }
+        }
+
+        private void btnReset_Click(object sender, RoutedEventArgs e)
+        {
+            if (rawInput.Count == 0)
+            {
+                return;
+            }
+            textBoxExpression.Text = rawInput[0];
         }
     }
 }
